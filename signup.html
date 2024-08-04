@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up for Vendor Engineering Portal</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='L&T.ico')}}">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+         @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@500&display=swap');
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            background: #6853c7;
+            background: -webkit-linear-gradient(-135deg, #63aeda, #4158d0);
+            background: -o-linear-gradient(-135deg, #63aeda, #4158d0);
+            background: -moz-linear-gradient(-135deg, #63aeda, #4158d0);
+            background: linear-gradient(-135deg, #63aeda, #4158d0);
+            height: 100vh;
+        }
+        .signup-container {
+            max-width: 400px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: block;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 20px 25px;
+            font-family: "Source Sans 3";
+            box-shadow: 0px 0px 50px 2px rgba(56, 86, 255, 0.8);
+        }
+        .signup-container h2 {
+            text-align: center;
+        }
+
+        input{
+            border-radius: 20px;
+        }
+        .signup-form {
+            margin-top: 5px;
+        }
+        .signup-form .form-group {
+            margin-bottom: 5px;
+        }
+        .signup-form label {
+            font-weight: bold;
+        }
+        .signup-form .btn-signup {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .signup-form .btn-signup:hover {
+            background-color: #0056b3;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        #signup{
+            width: 100px;
+            border-radius: 20px;
+            margin: 15px auto auto auto;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 signup-container">
+                <div class="text-center">
+                    <img style="width:250px; margin-bottom: 20px;" class="headimg " src="{{ url_for('static',filename='logo.png') }}"
+                        alt="vendor Icon">
+                </div>
+                <h5 class="text-center" style="font-weight: bold;">Sign Up for VE Portal</h5>
+                <form class="signup-form" action="/lnt/signup" method="POST">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" class="form-control" id="username" name="username" required  style="border-radius: 40px; background-color: #dfdfdf; border: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Email:</label>
+                        <input type="Email" class="form-control" id="email" name="email" required style="border-radius: 40px; background-color: #dfdfdf; border: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="password" name="password" required  style="border-radius: 40px; background-color: #dfdfdf; border: none;">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-signup" id="signup">Sign Up</button>
+                    
+                </form>
+                <p class="login-link">Already have an account? <a href="/lnt/login">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include your JavaScript and Bootstrap scripts here -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

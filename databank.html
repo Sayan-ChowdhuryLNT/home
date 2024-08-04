@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"  http-equiv="refresh" content="36000" content="width=device-width, initial-scale=1.0">
+    <title>Vendor List Data bank</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.css">
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@13.1/dist/handsontable.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    {% extends "homepage.html" %}
+
+    {% block content %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source Sans 3&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@500&display=swap');
+
+        body {
+            font-family: "Source Sans 3";
+            background-color: #f8f9fa;
+        }
+
+        .container2 {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            width: 95%;
+            background-color: rgba(255, 255, 255, 0.5);
+            /* Adjust the alpha value for the desired level of transparency */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgb(170, 180, 184);
+            backdrop-filter: blur(30px);
+            /* Adjust the blur value for the desired frosted effect */
+        }
+        .handsontable .htDimmed {
+    color: #000;
+}
+        
+
+        .header2 {
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+
+        }
+
+        .hot {
+            width: 100%;
+            margin-top: 20px;
+            height: 600px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <a href="/lnt/homepage"
+        style="color: #0b7738; font-weight: bold; text-decoration: none; margin-top: 20px;margin-left: 30px;"> <img
+            src="{{ url_for('static',filename='back.png') }}" alt="back" style="width: 30px;">Go Back</a>
+    <div class="container2">
+        <div class="header2">
+            Vendor Data Bank
+        </div>
+        <div class="controls">
+            <input id="search_field" type="search" placeholder=" Search..." style="width: 22%; border-radius: 10px; height: 40px; border: none;background-color: rgb(230, 230, 230);">
+          </div>
+        <div class="hot">
+            <div class="custom-table" id="handsontable-container2"></div>
+        </div>
+
+    </div>
+
+    <script>
+
+        var container2 = document.querySelector(".container2");
+        function calColWid(col) {
+            var containerWidth = container2.offsetWidth;
+            var numberOfColumns = col
+            var columnWidth = ((containerWidth - 120) / numberOfColumns);
+
+            console.log(numberOfColumns, containerWidth, containerWidth - 100, columnWidth)
+            return columnWidth;
+        }
+
+        $(document).ready(function () {
+            $("#handsontable-container2").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $(".dropdown-menu li").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        // Fetch data from your Flask API endpoint
+        fetch('/lnt/api/getData')
+            .then(response => response.json())
+            .then(data => {
+                // Create Handsontable instance
+                const searchField = document.querySelector('#search_field');
+                const hot = new Handsontable(document.getElementById('handsontable-container2'), {
+                    width: "100%",
+                    height: "100%",
+                    data: data.data,
+                    rowHeaders: true,
+                    readOnly: true,
+                    search: true,
+                    filters: true,
+                    dropdownMenu: ['filter_by_value', 'filter_action_bar'],
+                    colHeaders: ["EMI ITEMS", "Vendor<br>Name", "Person", "Contact No", "E-Mail", "Location", "Designation", "Scope<br>of Work", "Address", "Type Of<br>Supplier"],
+                    columnheaderHeight: 100,
+                    manualColumnResize: true,
+                    className: 'custom-table',
+                    colWidths: calColWid(10),
+                    licenseKey: 'non-commercial-and-evaluation',
+                    columns: data.columns.map(column => ({ data: column })),
+                });
+                searchField.addEventListener('keyup', function(event) {
+  // get the `Search` plugin's instance
+  const search = hot.getPlugin('search');
+  // use the `Search` plugin's `query()` method
+  const queryResult = search.query(event.target.value);
+
+  console.log(queryResult);
+
+  hot.render();
+});
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+
+</body>
+{% endblock %}
+
+</html>

@@ -1,0 +1,428 @@
+{% extends "homepage.html" %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" http-equiv="refresh" content="36000" content="width=device-width, initial-scale=1.0">
+    <title>New Project LnT</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@9.0/dist/handsontable.full.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@9.0/dist/handsontable.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source Sans 3&display=swap');
+
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@500&display=swap');
+
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+
+        h2 {
+            margin: 0 auto;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: bolder;
+        }
+
+        .container {
+            width: 99%;
+            /* height: 90%; */
+            display: block;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        form {
+            display: block;
+            margin: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        button {
+            display: block;
+            width: 130px;
+            height: 38px;
+            background-color: #0b7738;
+            border: none;
+            border-radius: 3px;
+            color: #fff;
+            margin: 0 auto;
+            font-weight: 600;
+        }
+
+        #closePopup {
+            display: block;
+            width: 80px;
+            height: 38px;
+            background-color: #1664a5;
+            border: none;
+            border-radius: 3px;
+            color: #fff;
+            margin: 20px auto;
+
+        }
+
+        .select {
+            margin-bottom: 16px;
+        }
+
+        hr.rounded {
+            border-top: 8px solid #bbb;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            width: 98%;
+            margin: 0 auto;
+            margin-bottom: 30px;
+            margin-top: 10px;
+        }
+
+        .red-star {
+            color: red;
+
+        }
+
+        .blur {
+            filter: blur(5px);
+            pointer-events: none;
+        }
+    </style>
+
+</head>
+
+<body ng-app="Vendoreng">
+
+    <div class="container">
+        <form ng-controller="FormController" ng-submit="submitForm()" action="/lnt/saveProject" method="post">
+            <div class="info" style="display: flex; justify-content: space-between;">
+                <a href="/lnt/project" style="color: #0b7738; font-weight: bold; text-decoration: none;"> <img
+                        src="{{ url_for('static',filename='back.png') }}" alt="back" style="width: 30px;">Go Back</a>
+
+                <!-- <a href="/lnt/project_info" style="color: #0b7738; font-weight: bold; text-decoration: none;"> <img
+                        src="{{ url_for('static',filename='project.png') }}" alt="back" style="width:25px;">Registered Projects</a>    -->
+            </div>
+            <h2>Project Information</h2>
+            <div class="row">
+                <!-- First Row with 3 Dropdowns -->
+                <h6 class="text-center" style="background-color: #84c8ff1c; color: rgb(0, 56, 102); font-weight: bold;padding: 0px;border-radius: 4px; justify-content: center;align-items: center;">BASIC DETAILS</h6>
+
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for="IC Name">IC Name: <span class="red-star" style="margin-left:2px">*</span></label>
+                        <select class="form-select" name="ic" ng-model="formData.IC" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="WET">WET</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for="firstDropdown">SBG Name: <span class="red-star"
+                                style="margin-left:2px">*</span></label>
+                        <select id="firstDropdown" class="form-select" onchange="updateSecondDropdown()" name="SBG"
+                            ng-model="formData.SBG" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="WWW">WWW</option>
+                            <option value="III">III</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for="secondDropdown">BU/BS Name:<span class="red-star"
+                                style="margin-left:2px">*</span></label>
+                        <select id="secondDropdown" class="form-select" name="BU" ng-model="formData.BU" required>
+                            <option value="" disabled selected>Select</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="documentNo">Job code:<span class="red-star" style="margin-left:2px">*</span></label>
+                        <input type="text-uppercase" style="text-transform: uppercase" id="Jobcode" name="Jobcode"
+                            ng-model="formData.Jobcode" class="form-control" required placeholder="">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="project">Project Name:<span class="red-star"
+                                style="margin-left:2px">*</span></label>
+                        <input type="text" id="Project" name="Project" ng-model="formData.Project" class="form-control"
+                            required>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">Client Name:<span class="red-star" style="margin-left:2px">*</span></label>
+                        <input type="text" id="Cname" name="Cname" ng-model="formData.Cname" class="form-control"
+                            required>
+                    </div>
+                </div>
+
+                <!-- <hr class="rounded"> -->
+                <h6 class="text-center" style="background-color: #84c8ff1c; color: rgb(0, 56, 102); font-weight: bold;padding: 0px;border-radius: 4px; justify-content: center;align-items: center;">SCHEDULED COMPLETION DATE</h6>
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for="process_date">Process:<span class="red-star"
+                                style="margin-left:2px">*</span></label>
+                        <input type="date" id="process_date" class="form-control" name="process_date" ng-model="formData.process_date"
+                            required>
+                        </input>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for=" mech_date">Mechanical: <span class="red-star" style="margin-left:2px">*</span></label>
+                        <input type="date" class="form-control" name="mech_date" ng-model="formData.mech_date" required>
+
+                        </input>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for="elec_date">Electrical: <span class="red-star"
+                                style="margin-left:2px">*</span></label>
+                        <input type="date" id="elec_date" class="form-control" name="elec_date" ng-model="formData.elec_date" required>
+
+                        </input>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for="instru_date">Instrumentation:<span class="red-star"
+                                style="margin-left:2px">*</span></label>
+                        <input type="date" id="instru_date" class="form-control" name="instru_date" ng-model="formData.instru_date"
+                            required>
+
+                        </input>
+                    </div>
+                </div>
+
+
+                <div class="col-md-4">
+                    <div class="select">
+                        <label for="other_date">Others:<span class="red-star"
+                                style="margin-left:2px"></span></label>
+                        <input type="date" id="other_date" class="form-control" name="other_date" ng-model="formData.other_date" >
+
+                        </input>
+                    </div>
+                </div>
+
+
+                <!-- <hr class="rounded"> -->
+
+               
+                <h6 class="text-center" style="background-color: #84c8ff1c; color: rgb(0, 56, 102); font-weight: bold;padding: 0px;border-radius: 4px; justify-content: center;align-items: center;">PROJECT ROLES</h6>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">Vendor Engineering Manager:<span class="red-star"
+                                style="margin-left:2px">*</span></label>
+                        <input type="email" id="Emanage" name="Emanage" ng-model="formData.Emanage" class="form-control"
+                            required>
+                    </div>
+                </div>
+
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">Process:</label>
+                        <input type="email" id="Plead" name="Plead" ng-model="formData.Plead" class="form-control">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">Mechanical:</label>
+                        <input type="text" id="Mlead" name="Mlead" ng-model="formData.Mlead" class="form-control">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">Electrical:</label>
+                        <input type="text" id="Elead" name="Elead" ng-model="formData.Elead" class="form-control">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">Instrumentation:</label>
+                        <input type="text" id="Ilead" name="Ilead" ng-model="formData.Ilead" class="form-control">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">SCM:</label>
+                            <input type="text" id="scmlead" name="scmlead" ng-model="formData.scmlead"
+                                class="form-control">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="title">Others:</label>
+                        <input type="text" id="others" name="others" ng-model="formData.others" class="form-control">
+                    </div>
+                </div>
+                <span
+                    style="color: rgb(5, 47, 82); font-size: 15px;display: block; font-weight: bold;margin-bottom: 20px; background: #97979725; border-radius: 6px; padding: 8px;"> <img src="{{ url_for('static',filename='threat.png') }}" alt="back"
+                    style="width: 30px; margin-right: 5px;margin-bottom: 8px;"><span style="font-size: 17px;">Note: <br></span>
+                &nbsp;&nbsp;1. To include multiple emails, please
+                    separate each email address with a semicolon ";". Example:
+                    abc@lntecc.com;efg@lntecc.com. <br>&nbsp;&nbsp;2. Basic details and Scheduled Completion date once filled, cannot be changed later. </span>
+
+
+            </div>
+            <button type="submit">Save Project</button>
+        </form>
+    </div>
+
+    <div id="popup"
+        style="width: 500px;display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); z-index: 9999; justify-content: center; align-items: center;">
+        <h4
+            style="text-align: center; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto;">
+            <img src="{{ url_for('static',filename='information.png') }}" alt="back"
+                style="width: 30px; margin-right: 5px;">Information
+        </h4>
+        <p>Please ensure that all mandatory fields (Marked with<span class="red-star" style="margin-left:2px">*</span>)
+            are filled. </p>
+        <p>Review the primary data before submitting as once data is submitted, it cannot be changed later and must be
+            completely deleted.</p>
+        <p>If you need any assistance, refer to the help document or contact your VE Coordinator.</p>
+        <label style="display: flex; justify-content: center;"><input class="form-check-input" type="checkbox"
+                id="dontShowAgain" style="margin-right: 5px;"> Do not show this again</label>
+        <button id="closePopup">Close</button>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+        document.getElementById('Jobcode').addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+        })
+
+        // Get references to the dropdowns
+        var firstDropdown = document.getElementById('firstDropdown');
+        var secondDropdown = document.getElementById('secondDropdown');
+
+        // Define dynamic options for the second dropdown based on the first dropdown
+        var dynamicOptions = {
+            WWW: [
+
+                { value: 'RWS 1 (C&W)', label: 'RWS 1 (C&W)' },
+                { value: 'RWS 2 (North)', label: 'RWS 2 (North)' },
+                { value: 'RWS 3 (S&E)', label: 'RWS 3 (S&E)' },
+                { value: 'WW', label: 'WW' },
+                { value: 'UWWM', label: 'UWWM' }
+            ],
+            III: [
+                { value: 'Irrigation', label: 'Irrigation' },
+                { value: 'Industrial', label: 'Industrial' },
+                { value: 'Smart Infra', label: 'Smart Infra' },
+                { value: 'International', label: 'International' },
+            ]
+        };
+
+        function updateSecondDropdown() {
+            var selectedCategory = firstDropdown.value;
+            secondDropdown.innerHTML = '<option value="" disabled selected>Select</option>';
+
+            if (dynamicOptions[selectedCategory]) {
+                dynamicOptions[selectedCategory].forEach(function (option) {
+                    var optionElement = document.createElement('option');
+                    optionElement.value = option.value;
+                    optionElement.text = option.label;
+                    secondDropdown.appendChild(optionElement);
+                });
+            }
+        }
+
+
+        updateSecondDropdown();
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var popup = document.getElementById("popup");
+            var closePopupButton = document.getElementById("closePopup");
+            var dontShowAgainCheckbox = document.getElementById("dontShowAgain");
+
+            // Check if the user has chosen not to show the popup again
+            if (!shouldNotShowPopup()) {
+                // Show the popup
+                popup.style.display = "block";
+                // Add blur effect to the container when the popup is displayed
+                document.querySelector(".container").classList.add("blur");
+            }
+
+            // Add event listener to the close button
+            closePopupButton.addEventListener("click", function () {
+                // Hide the popup
+                popup.style.display = "none";
+                // Remove blur effect from the container when the popup is closed
+                document.querySelector(".container").classList.remove("blur");
+                // Check if "Don't show again" checkbox is checked
+                if (dontShowAgainCheckbox.checked) {
+
+                    setCookie("hidePopup", "true", 365);
+                }
+            });
+
+            // Function to check if the popup should be shown
+            function shouldNotShowPopup() {
+                return getCookie("hidePopup") === "true";
+            }
+
+            // Function to set a cookie
+            function setCookie(name, value, days) {
+                var expires = "";
+                if (days) {
+                    var date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+            }
+
+            // Function to get a cookie
+            function getCookie(name) {
+                var nameEQ = name + "=";
+                var ca = document.cookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
+        });
+
+
+    </script>
+
+</body>
+{% endblock %}
+
+</html>

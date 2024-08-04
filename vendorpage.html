@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Display</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <!-- Handsontable CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@9.0.0/dist/handsontable.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .form-table {
+            width: 100%;
+        }
+
+        .form-table th,
+        .form-table td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        .form-table th {
+            background-color: #f2f2f2;
+        }
+
+        .handsontable-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-20">
+        <h1 class="mb-4">Confirmation Page</h1>
+
+        <!-- Display Form Data -->
+        <h2>Project Data</h2>
+        <form>
+            <table class="table table-bordered form-table">
+                <tbody>
+                    {% for key, value in form_data.items() %}
+                        <tr>
+                            <th>{{ key }}</th>
+                            <td><input type="text" class="form-control" value="{{ value }}" readonly></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+
+        <!-- Display Handsontable Data -->
+        <h2 class="mt-20">Datasheet Information</h2>
+        <div id="handsontable-container" class="handsontable-container"></div>
+
+    </div>
+
+    <!-- Bootstrap JS and Handsontable JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@9.0.0/dist/handsontable.min.js"></script>
+    <script>
+        const handsontableData = {{ handsontable_data | tojson }};
+    
+        const handsontableContainer = document.getElementById('handsontable-container');
+
+        const hotSettings = {
+            licenseKey: 'non-commercial-and-evaluation',
+            data: handsontableData,
+            colHeaders: ['Sl No', 'Parameter', 'Unit', 'Requirement', 'Mandatory', 'Vendor', 'Specify for Others'],
+            columns: [
+                { data: 0, readOnly: true},
+                { data: 1, readOnly: true},
+                { data: 2, readOnly: true },
+                { data: 3, readOnly: true},
+                { data: 4, type: "dropdown", source: ['Yes', 'No'] ,readOnly: true},
+                { data: 5, type: 'dropdown', source: ['Confirmed', 'Other', 'NA'] },
+                { data: 6 }],
+            rowHeaders: true,
+            contextMenu: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            stretchH: 'all',
+        };
+
+        const hot = new Handsontable(handsontableContainer, hotSettings);
+    </script>
+</body>
+</html>

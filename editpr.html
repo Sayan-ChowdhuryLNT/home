@@ -1,0 +1,531 @@
+{% extends "homepage.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,  http-equiv=" refresh" content="36000" initial-scale=1.0">
+    <title>Fill PR Data</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/detbt.scss">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@13.1/dist/handsontable.full.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@13.1/dist/handsontable.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source Sans 3&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@500&display=swap');
+
+
+        body {
+            font-family: "Source Sans 3";
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            display: block;
+            margin: 50px auto;
+            max-width: 95%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        #disciplineDropdownContainer {
+            display: none;
+        }
+
+        form {
+            margin-bottom: 20px;
+            position: relative;
+            /* Ensure position relative for absolute positioning of suggestions */
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        #suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-top: none;
+            display: none;
+            z-index: 2;
+        }
+
+        .custom-table .handsontable span.colHeader.columnSorting.sort-1::after {
+            content: '';
+        }
+
+
+        .custom-table .handsontable span.colHeader.columnSorting.sort-2::after {
+            content: '';
+        }
+
+        #suggestions a {
+            display: block;
+            padding: 10px;
+            color: #000;
+            text-decoration: none;
+        }
+
+        #suggestions a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .mb-3 {
+
+            display: block;
+            justify-content: center;
+
+        }
+
+        button {
+            margin-right: 10px;
+        }
+
+        .custom-table thead th {
+            padding: 0px 10px;
+            font-size: 14px;
+            font-family: "Source Sans 3";
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .custom-table {
+
+            font-family: "Source Sans 3";
+
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+
+</head>
+
+<body ng-app="Vendoreng">
+    <div class="container">
+        <a href="/lnt/prstatus" style="color: #0b7738; font-weight: bold; text-decoration: none;">
+            <img src="{{ url_for('static',filename='back.png') }}" alt="back" style="width: 30px;">Go Back
+        </a>
+        <h2 style="font-weight: bold;">Edit Primary PR Data</h2>
+        <div>
+            <form>
+                <div class="mb-3">
+                    <label for="searchBar" class="form-label">Search for Projects:</label>
+                    <input type="text" class="form-control" name="searchBar" id="searchBar"
+                        placeholder="Type Job Code or Project Name" style="width: 20%;border-radius: 20px;">
+                    <div id="suggestions" style="width: 20%;border-radius: 20px;margin-top: 5px;"></div>
+                </div>
+            </form>
+
+            <div class="ribbon">
+                <button class="btn text-center dlt" id="deleteButton"
+                    style=" background: rgb(245, 245, 245) !important; color: rgb(255, 98, 98);border-radius: 20px;font-weight: bold;">
+                    <img src="{{ url_for('static',filename='dlt.png') }}" alt="delete"
+                        style="width: 20px;  margin-right: 5px;margin-bottom: 5px;">
+                    Delete PR
+                </button>
+            </div>
+        </div>
+
+        <div id="hot" style="margin: 10px 0; width: auto; z-index: 1;"></div>
+
+        <button id="updateButton" class="btn btn-primary"
+            style="margin-top: 20px;float: right; background:linear-gradient(to right, #279e70,#0b7738,#1c852a);">
+            Update Data
+        </button>
+    </div>
+
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content" style="width: 440px;">
+            <div style="display: flex; justify-content: space-between;">
+                <h4 style="margin: 0;">Enter PR Vendor Code to delete:</h4>
+                <span class="close" style="padding-bottom: 15px; margin-top: 0px;">&times;</span>
+            </div>
+            <input type="text" id="vendorNumber" placeholder="PR Vendor Code" class="form-control"
+                style="width: 400px;">
+            <div style="display: flex; justify-content: space-around;">
+                <button class="btn btn-primary" id="okButton"
+                    style="width: 60px; margin-top: 10px; text-align: center;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between;">
+                <h4>Are you sure you want to delete the entry?</h4>
+                <span class="close">&times;</span>
+            </div>
+            <div style="display: flex; justify-content: center;">
+                <button class="btn btn-success" id="confirmYes">Yes</button>
+                <button class="btn btn-secondary" id="confirmNo">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal hidden">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: center;">
+                <h4 id="messageText"></h4>
+                <!-- <span class="close">&times;</span> -->
+            </div>
+            <div style="display: flex; justify-content: center;">
+                <button class="btn btn-warning" id="messageOk" style="width: 50px;">OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+
+
+    <script>
+
+
+        $('#updateButton').hide();
+        $('#deleteButton').hide();
+
+
+
+        $('#searchBar').on('input', function () {
+            var searchQuery = $(this).val();
+            var suggestionsContainer = $('#suggestions');
+
+            if (searchQuery.length >= 2) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/lnt/suggest',
+                    data: { 'search_query': searchQuery },
+                    success: function (data) {
+                        suggestionsContainer.empty();
+
+                        for (var i = 0; i < data.length; i++) {
+                            suggestionsContainer.append('<a href="#">' + data[i] + '</a>');
+                        }
+
+                        suggestionsContainer.show();
+                    }
+                });
+            } else {
+                suggestionsContainer.hide();
+            }
+
+        });
+
+
+        $('#suggestions').on('click', 'a', function () {
+            const selectedJobCode = $(this).text();
+            $('#suggestions').hide();
+            $('#updateButton').show();
+            $('#deleteButton').show();
+
+
+
+            // Fill search bar with the clicked job code
+            $('#searchBar').val(selectedJobCode);
+            fetchDetails(selectedJobCode);
+        });
+
+
+        function fetchDetails(jobCode) {
+            $.ajax({
+                type: 'POST',
+                url: '/lnt/api/getPrdata',
+                data: { 'selected_job_code': jobCode },
+                success: function (data) {
+                    initializeHandsontable(data);
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 403) {
+                        // Handle 403 Forbidden (Permission Denied) status
+                        alert('Permission Denied. You do not have necessary permissions to perform this operation.');
+                    } else {
+                        // Handle other errors if needed
+                        console.error('Error:', status, error);
+                    }
+                }
+            });
+        }
+
+        function negativeValueRenderer(instance, td, row, col, prop, value, cellProperties) {
+            Handsontable.renderers.TextRenderer.apply(this, arguments);
+
+            // if the row contains a negative number
+            if (parseInt(value, 10) < 0) {
+                // add class 'make-me-red'
+                td.className = 'make-me-red';
+            }
+
+
+        }
+
+        nested = [
+            [{ label: 'BASIC DETAILS', colspan: 6 }, { label: 'PRE ORDER STAGE', colspan: 21 }, { label: 'POST ORDER STAGE', colspan: 11 }],
+            [{ label: 'PROJECT', colspan: 1 }, { label: 'DISCIPLINE', colspan: 1 }, { label: 'EQUIPMENT', colspan: 1 }, { label: 'PR CODE', colspan: 1 }, { label: 'PR VENDOR<br>CODE', colspan: 1 }, { label: 'VENDOR', colspan: 1 }, { label: 'STATUS', colspan: 1 },
+            { label: 'DAYS ELAPSED', colspan: 1 }, { label: 'REMARKS', colspan: 1 }, { label: 'VENDOR CONTACT', colspan: 1 }, { label: 'VENDOR EMAIL', colspan: 1 }, { label: 'PR ISSUED DATE<br>(PRELIMINARY BOQ)', colspan: 1 }, { label: 'ENQUIRY SENT<br>DATE', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-A', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-A', colspan: 1 },
+            { label: 'OFFER<br>RECEIVED DATE<br>REV-B', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-B', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-C', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-C', colspan: 1 },
+            { label: 'OFFER<br>RECEIVED DATE<br>REV-D', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-D', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-E', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-E', colspan: 1 },
+            { label: 'FINAL TECHNICAL<br>CLEARANCE MEETING<br>WITH VENDOR', colspan: 1 }, { label: 'FINAL DOCUMENT<br>RECEIVED FROM<br>VENDOR', colspan: 1 }, { label: 'SENT TO BU<br>OPERATIONS', colspan: 1 }, { label: 'PRIORITY<br>(T1/T2/T3)', colspan: 1 },
+            { label: 'PO ISSUED<br>DATE', colspan: 1 }, { label: 'FINALIZED VENDOR', colspan: 1 }, { label: 'POST ORDER<br>DOC/DRG<br>RECEIVED DATE', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE', colspan: 1 },
+            { label: 'FINAL TECHNICAL<br>CLEARANCE MEETING<br>WITH VENDOR', colspan: 1 }, { label: 'FINAL DOCUMENT<br>RECEIVED FROM<br>VENDOR', colspan: 1 }, { label: 'CLIENT APPROVAL<br>DATE', colspan: 1 },{ label: 'PLANNED<br>PRE-ORDER<br>COMPLETION DATE', colspan: 1 },{ label: 'PLANNED<br>PURCHASE-ORDER<br> DATE', colspan: 1 },{ label: 'PLANNED<br>POST-ORDER<br>COMPLETION DATE', colspan: 1 }, { label: 'LAST<br>MODIFIED BY', colspan: 1 },],
+        ];
+        function initializeHandsontable(data) {
+            const cont = new Handsontable(document.getElementById('hot'), {
+                width: "auto",
+                height: 400,
+                data: data.data,
+                contextMenu: true,
+                filters: true,
+                rowHeaders: true,
+                dropdownMenu: ['filter_by_value', 'filter_action_bar'],
+                nestedHeaders: nested,
+                manualColumnResize: true,
+                autoColumnSize: true,
+                fixedColumnsLeft: 6,
+                className: "custom-table",
+                colWidths: [110, 140, 150, 130, 150, 120, 230, 130, 200, 150, 150, 200, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170,170,170, 300],
+                copyPaste: true,
+                licenseKey: 'non-commercial-and-evaluation',
+                multiColumnSorting: {
+                    initialConfig: [
+                        // at initialization, sort the data by the 'Brand' column, in ascending order
+                        {
+                            column: 1,
+                            sortOrder: 'desc',
+                        },
+                        // at initialization, sort the data by the 'Model' column, in descending order
+                        {
+                            column: 4,
+                            sortOrder: 'asc',
+                        },
+                    ],
+                },
+                columns: data.columns.map(column => {
+                    if (["pr_issue_date_pre", "pr_issue_date_final", "offer_recv_date", "comments_sent_pre", 'offer_recv_date_2', 'comments_sent_pre_2', 'offer_recv_date_3', 'comments_sent_pre_3',
+                        'offer_recv_date_4', 'comments_sent_pre_4', 'offer_recv_date_5', 'comments_sent_pre_5', "tc_meeting_vendor_pre", "final_vendor_doc_pre", "post_doc_rcv_dt", "comments_sent_post", "tc_meeting_vendor_post", "final_vendor_doc_post", "sent_to_scm", "po_issued_date", "mfc_issued_date", "target_completion_date","target_completion_date_post","target_completion_date_po"].includes(column)) {
+                        // Use date editor for date columns
+                        return { data: column, type: 'date', dateFormat: 'DD.MM.YY' };
+                    } else if (["project_name", "discipline", "equipment", "item_code", "item_vendor_code", "last_modified_by"].includes(column)) {
+
+                        return { data: column };
+                    }
+
+                    else if (column === "discipline") {
+
+                        return {
+                            data: column, type: 'dropdown',
+                            source: ["Process", "Mechanical", "Electrical", "Instrumentation", "Others"]
+                        };
+                    }
+
+
+                    else if (column === "elapsed_days" || column === "target_completion_date_post") {
+
+                        return { data: column, readOnly: true };
+
+                    }
+                    else if (column === "status") {
+
+                        return {
+                            data: column, type: 'dropdown',
+                            source: ["Enquiry yet to float", "Awaiting pre-offer from vendor", "Pre-order pending with EDRC", "Pre-order comments issued", "Pre-order technically cleared", "Pre-order technically rejected",
+                                "Regret offer", "Sent to BU Operations", "Awaiting post-offer from vendor", "Post-order pending with EDRC", "Post-order comments issued", "Post-order technically cleared", "Approved by Client"]
+                        };
+                    }
+                    else {
+                        // For other columns, use default settings
+                        return { data: column };
+                    }
+                }),
+            });
+            Handsontable.hooks.add('modifyColWidth', function (width) {
+                if (this === cont.getPlugin('dropdownMenu').menu.hotMenu) {
+                    return 330;
+                }
+
+                return width;
+            })
+            var updateButton = document.getElementById('updateButton');
+            updateButton.onclick = function () {
+                saveChangesToSQL(cont.getData(), $('#searchBar').val());
+            };
+        }
+
+
+
+        function saveChangesToSQL(data, job_Code) {
+            // Send the modified data to the Flask backend for updating SQLite
+            $.ajax({
+                type: 'POST',
+                url: '/lnt/api/updatePrdata',
+                contentType: 'application/json;charset=UTF-8',
+
+                data: JSON.stringify({ 'selected_job_code': job_Code, 'updated_data': data }),
+                success: function (response) {
+                    alert('Data updated successfully!');
+
+                    fetchDetails($('#searchBar').val());
+                },
+                error: function (error) {
+                    console.error('Error updating data:', error);
+                    var errorMessage = error.responseJSON.error; // Extracting the error message
+                    alert('Error updating data: ' + errorMessage); // Displaying the error message in the alert box
+                }
+            });
+        }
+
+
+
+
+
+        const deleteButton = document.getElementById('deleteButton');
+        const deleteModal = document.getElementById('deleteModal');
+        const confirmModal = document.getElementById('confirmModal');
+        const messageModal = document.getElementById('messageModal');
+        const vendorNumberInput = document.getElementById('vendorNumber');
+        const okButton = document.getElementById('okButton');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+        const messageOk = document.getElementById('messageOk');
+        const messageText = document.getElementById('messageText');
+        const closeButtons = document.querySelectorAll('.close');
+
+        let vendorNumber = '';
+
+        deleteButton.onclick = function () {
+            deleteModal.style.display = "block";
+        }
+
+        closeButtons.forEach(button => {
+            button.onclick = function () {
+                deleteModal.style.display = "none";
+                confirmModal.style.display = "none";
+                messageModal.style.display = "none";
+            }
+        });
+
+        okButton.onclick = function () {
+            vendorNumber = vendorNumberInput.value;
+            if (vendorNumber) {
+                deleteModal.style.display = "none";
+                confirmModal.style.display = "block";
+            } else {
+                alert('Please enter a vendor number.');
+            }
+        }
+
+        confirmYes.onclick = function () {
+            confirmModal.style.display = "none";
+            fetch('/lnt/delete_vendor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ vendor_number: vendorNumber })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    messageText.innerText = data.message || 'Error: ' + data.error;
+                    messageModal.style.display = "block";
+                })
+                .catch(error => {
+                    messageText.innerText = 'Error: ' + error.message;
+                    messageModal.style.display = "block";
+                });
+        }
+
+        confirmNo.onclick = function () {
+            confirmModal.style.display = "none";
+        }
+
+        messageOk.onclick = function () {
+            messageModal.style.display = "none";
+            fetchDetails($('#searchBar').val());
+        }
+
+        window.onclick = function (event) {
+            if (event.target === deleteModal) {
+                deleteModal.style.display = "none";
+            }
+            if (event.target === confirmModal) {
+                confirmModal.style.display = "none";
+            }
+            if (event.target === messageModal) {
+                messageModal.style.display = "none";
+            }
+        }
+
+
+
+    </script>
+
+    {% endblock %}
+</body>
+
+</html>

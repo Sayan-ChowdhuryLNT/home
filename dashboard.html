@@ -1,0 +1,622 @@
+{% extends "homepage.html" %}
+{% block content %}
+
+<head>
+  <meta charset="UTF-8" />
+  <meta  http-equiv="refresh" content="36000"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{title}}</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.2/dist/handsontable.full.min.css">
+  <link rel="stylesheet" href="/static/dashboardstyles.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</head>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@500&display=swap');
+</style>
+
+<body>
+  <div class="container-fluid text-center">
+    <div id="wrapper">
+
+      <div class="content-area">
+        <div class="title mx-auto"
+          style="display: flex; align-items: center; justify-content: space-evenly; margin: 0px 0px 10px 0px; padding: 0;">
+          <a href="/lnt/homepage"
+            style="color: #0b7738; font-weight: bold; text-decoration: none; margin: 0px ; order: -2;">
+            <img src="{{ url_for('static',filename='back.png') }}" alt="back" style="width: 30px;">Go Back
+          </a>
+          <p class="header" style="margin: 0 auto;">
+            <img src="{{ url_for('static',filename='console.png') }}" alt="back"
+              style="width: 30px; margin: -5px 5px 0 0; align-items: center;">Management Console
+          </p>
+
+          <a href="/lnt/top_sheet" class="top" type="reset" id="topButton">
+            <img href="/lnt/top_sheet" src="{{ url_for('static',filename='topg.png') }}" alt="filter"
+              style="height: 25px; margin-right: 5px;">
+            Top Sheet</a>
+          </a>
+        </div>
+
+        <div class="container-fluid" style="justify-content: center; ">
+          <div class="box"
+            style="width: 100.9%; margin: 0px 0px 10px -5px;background-color: #fafafa;padding-left:50px ; ">
+            <div class="btn-group">
+
+              <form action="/lnt/filtered_data" method="post">
+                <div class="filters">
+
+                  <select id="dropdownMenuButton1" class="select2" name="ic" style="width: 100px; margin-right: 50px;"
+                    data-dropdown-css-class="my-dropdown">
+                    <option value="IC" selected disabled>IC</option>
+                    <option value="ALL">ALL</option>
+                    {% for option in ic_options %}
+                    <option value="{{ option }}" {% if option==selected_ic %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <!-- SBG Dropdown -->
+                  <select id="dropdownMenuButton2" class="select2" name="sbg" style="width: 100px;">
+                    <option value="sbg" selected disabled>SBG</option>
+                    <option value="ALL">ALL</option>
+                    {% for option in sbg %}
+                    <option value="{{ option }}" {% if option==selected_sbg %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <!-- BU Dropdown -->
+                  <select id="dropdownMenuButton3" class="select2" name="bu" style="width: 200px;">
+                    <option value="BU" selected disabled>BU/BS</option>
+                    <option value="ALL">ALL</option>
+                    {% for option in bu %}
+                    <option value="{{ option }}" {% if option==selected_bu %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <select id="dropdownMenuButton4" class="select2" name="project" style="width: 200px; ">
+                    <option value="Project" selected disabled>Project</option>
+                    <option value="ALL">ALL</option>
+                    {% for option in project %}
+                    <option value="{{ option }}" {% if option==selected_project %}selected{% endif %}>{{ option }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                  <select id="dropdownMenuButton5" class="select2" name="discipline" style="width: 200px;">
+                    <option value="Discipline" selected disabled>Discipline</option>
+                    <option value="ALL">ALL</option>
+                    {% for option in discipline %}
+                    <option value="{{ option }}" {% if option==selected_discipline %}selected{% endif %}>{{ option }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                   
+                
+
+                  <!-- Apply Filter and Clear Filter buttons -->
+                  <div class="btn-group" style="margin-left: 5%;">
+                    <button class="select" type="submit" id="FilterButton"><img
+                      src="{{ url_for('static',filename='filt.png') }}" alt="filter"
+                      style="height: 20px; margin-right: 5px; filter: invert(100%);">Apply Filter</button>
+                    <button class="select" type="reset" id="ClearButton">
+                      <a href="/lnt/dashboard" style="color: white; text-decoration: none;"><img
+                        href="/lnt/dashboard" src="{{ url_for('static',filename='notfilter.png') }}" alt="filter"
+                        style="height: 25px; margin-right: 5px; filter: invert(100%);">Clear Filter</a>
+                    </button>
+                
+
+              </form>
+             
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="ppi" style="width: 100.9%; margin: 5px 0px 5px -5px;background-color: #fafafa;padding-left:50px ;padding-right:50px ; padding-top: 20px; padding-bottom: 20px; border-radius: 4px;">
+        <!-- <h5>Project Procurement Index (PPI)</h5> -->
+        <div class="flex-container">
+          <div class="sub_ppi">Project Procurement Index (PPI) <br> <Span class="ppi_value">{{total_ppi}}</Span></div>
+
+          <div class="sub_ppi">Process <br> <Span class="ppi_value">{{process_ppi}}</Span></div>
+          <div class="sub_ppi">Mechanical <br> <Span class="ppi_value">{{mech_ppi}}</Span></div>
+          <div class="sub_ppi">Electrical <br> <Span class="ppi_value">{{elec_ppi}}</Span></div>
+          <div class="sub_ppi">Instrumentation <br><Span class="ppi_value">{{instru_ppi}}</Span></div>
+        </div>
+      </div>
+      
+
+
+
+      <div class="row">
+        <div class="col">
+          <div class="box">
+            <div id="donut"></div>
+          </div>
+          <div class="box">
+            <div id="donut2"></div>
+
+          </div>
+          <div class="col" style="display: flex; padding: 5px; max-height: 380px;">
+
+            <div class="box" style="min-width: 450px; margin:0; display: block;">
+              <h5>Pre-Order Enquiries</h5>
+              <div class="box2" style="min-width: 400px; margin:0 ;">
+                <div class="blocks">
+                  <div id="kpi1" style="width: 100%;font-size: 12px;">PR Issued</div>
+
+                  <div class="data" id="kpi1_data" style="font-size: 20px; font-weight: bold; color: #0b7738;"></div>
+                </div>
+
+
+                <div class="blocks">
+                  <div id="kpi2" style="width: 100%;font-size: 12px;">With EDRC</div>
+                  <div class="data" id="kpi2_data" style="font-size: 20px; font-weight: bold; color: #A04740;"></div>
+                </div>
+
+
+                <div class="blocks">
+
+                  <div id="kpi3" style="width: 100%;font-size: 12px;">With Vendor</div>
+                  <div class="data" id="kpi3_data" style="font-size: 20px; font-weight: bold; color: #8886CF;"></div>
+
+                </div>
+
+
+                <div class="blocks">
+
+
+                  <div id="kpi4" style="width: 100%;font-size: 12px;">Cleared</div>
+                  <div class="data" id="kpi4_data" style="font-size: 20px; font-weight: bold; color: #004A99;"></div>
+                </div>
+
+              </div>
+              <div style=" margin-top:10px">
+                <h5>Post-Order Items</h5>
+              </div>
+              <div class="box2" style="min-width: 400px; margin: 0 ;">
+                <div class="blocks">
+                  <div id="kpi1" style="width: 100%;font-size: 12px;">PO Issued</div>
+                  <div class="data" id="kpi1_data2" style="font-size: 20px; font-weight: bold; color: #0b7738;"><span
+                      id="kpi1_sub"></span> </div>
+                </div>
+                <div class="blocks">
+                  <div id="kpi2" style="width: 100%;font-size: 12px;">With EDRC</div>
+                  <div class="data" id="kpi2_data2" style="font-size: 20px; font-weight: bold; color: #A04740;"></div>
+                </div>
+                <div class="blocks">
+                  <div id="kpi3" style="width: 100%;font-size: 12px;">With Vendor</div>
+                  <div class="data" id="kpi3_data2" style="font-size: 20px; font-weight: bold; color: #8886CF;"></div>
+                </div>
+                <div class="blocks">
+
+                  <div id="kpi4" style="width: 100%;font-size: 12px;">Cleared</div>
+                  <div class="data" id="kpi4_data2" style="font-size: 20px; font-weight: bold; color: #004A99;"></div>
+                </div>
+              </div>
+              <div style=" margin-top:10px;">
+                <h5>Average Cycle time (In days)</h5>
+              </div>
+              <div class="box2" style="min-width: 400px; margin:0; display: block;">
+                <div class="timeline ">
+                  <span class="smalldot"><span class="greendot"></span></span>
+                  <hr width="6%" color="grey" size="10">
+                  <span class="bigdot" id="pr_floated"></span>
+                  <hr width="6%" color="grey" size="10">
+
+
+
+                  <span class="smalldot"><span class="greendot"></span></span>
+                  <hr width="6%" color="grey" size="10">
+
+                  <span class="bigdot" id="pre_o"></span>
+                  <hr width="6%" color="grey" size="10">
+
+                  <span class="smalldot"><span class="greendot"></span></span>
+                  <hr width="6%" color="grey" size="10">
+
+                  <span class="bigdot" id="post_o"></span>
+                  <hr width="6%" color="grey" size="10">
+
+                  <span class="smalldot"><span class="greendot"></span></span>
+                </div>
+                <div class="stages" style="display: flex;width: 100%;font-size: 12px; font-weight: bold;">
+                  <span style="padding-right: 40px;">PR Floated</span>
+                  <span style="padding-right: 37px;">Pre Order Stage</span>
+                  <span style="padding-right: 30px;">Post order Stage</span>
+                  <span>Completed</span>
+
+                </div>
+
+
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="padding: 0 10px;">
+      <div class="col">
+        <div class="box" style="width: 70%;">
+          <div id="bar" style="width: 100%;"></div>
+        </div>
+        <div class="box" style="width: 30%;">
+          <div id="bar2" style="width: 100%;"></div>
+
+        </div>
+      </div>
+    </div>
+    <div class="row" id="lastrow">
+
+      <div class="col" id="lastcol">
+        <p style="margin-bottom:20px; font-size: 20px; font-weight: bold;"><img
+          src="{{ url_for('static',filename='activity.png') }}" alt="filter"
+          style="height: 23px; margin:0px 5px 3px 0px;">Detailed Status
+           <button id="exportButton" class="btn"
+            style="float: right; color: #000000;font-weight: bold;background: #eff5ed; font-size: 15px; padding: 7px;"><img src="{{ url_for('static',filename='excel.png') }}" alt="back"
+            style="width: 25px; align-items: center; margin-right: 6.5px;">Export
+             </button></p>
+
+
+
+        <div id="status"></div>
+
+      </div>
+
+
+    </div>
+  </div>
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="spinner"></div>
+  </div>
+
+  </div>
+  </div>
+  </div>
+  <div class="popup-overlay">
+  <div class="popup" id="popup">
+    
+    <h4 style="background-color: #e2e2e2; color: rgb(17, 60, 153); border-radius: 2px;padding: 5px; display: flex;justify-content: space-between;"><span style="margin-left:7px ; "><img
+      href="/lnt/dashboard" src="{{ url_for('static',filename='audit.png') }}" alt="filter"
+      style="height: 30px; margin: 0px 5px 3px 0px; ">Detailed Information:</span> <button  onclick="closePopup()" style="float: right; border: none;background-color: #e2e2e2;"><img
+        href="/lnt/dashboard" src="{{ url_for('static',filename='delete.png') }}" alt="filter"
+        style="height: 30px;"></button></h4>
+    <div class="hotpop" id="hotpop"></div>
+    <!-- <p id="popup-details"></p> -->
+    
+  </div>
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/handsontable@14.2/dist/handsontable.full.min.js"></script>
+  
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="/static/apexcharts.js"></script>
+  <script src="/static/dashboardscripts.js"></script>
+
+
+  <script>
+
+function openPopup(discipline_for_pop,stage_for_pop) {
+  // Create an object with the data to send
+  const data = { discipline: discipline_for_pop,stage:stage_for_pop };
+
+  // Convert the data to JSON string
+  const jsonData = JSON.stringify(data);
+
+  fetch('/lnt/api/get_popup_data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8',
+    },
+    body: jsonData, 
+  })
+  .then(response => response.json())
+  .then(data => {
+    // document.getElementById('popup-details').innerText = `Clicked on ${data}`;
+    const hot_pop = new Handsontable(document.getElementById('hotpop'), {
+          width: 1200,
+          height: 400,
+          data: data,
+          filters: true,
+          rowHeaders: true,
+          readOnly: true,
+          copyPaste: true,
+          colHeaders: ["PROJECT NAME","DISCIPLINE","EQUIPMENT NAME","PR VENDOR NUMBER" ,"VENDOR NAME","STATUS","ELAPSED DAYS"],
+          className: "custom-table",
+          manualColumnResize: true,
+          manualRowResize: true,
+          dropdownMenu: ['filter_by_condition', 'filter_by_value', 'filter_action_bar',],
+          multiColumnSorting: {
+            initialConfig: [
+              {
+                column: 0,
+                sortOrder: 'asc',
+              },
+              {
+                column: 1,
+                sortOrder: 'desc',
+              },
+              {
+                column: 2,
+                sortOrder: 'asc',
+              },
+              {
+                column: 3,
+                sortOrder: 'asc',
+              },
+            ],
+          },
+          colWidths:[140,130,190,220,130,190,120],
+          licenseKey: 'non-commercial-and-evaluation',
+        })
+
+    document.querySelector('.popup-overlay').style.display = 'block';
+    document.querySelector('.popup').style.display = 'block';
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    // Handle errors here
+  });
+}
+
+
+  function closePopup() {
+    document.querySelector('.popup-overlay').style.display = 'none';
+    document.querySelector('.popup').style.display = 'none';
+  }
+
+
+    $(document).ready(function () {
+      $('#loading-screen').hide();
+    });
+    function fetchKPIData() {
+      fetch('/lnt/api/get_kpi_data')
+        .then(response => response.json())
+        .then(data => {
+
+          const prissuedpre = data.data.PendingWithVendorPRE + data.data.PendingWithEDRCPRE + data.data.Cleared + "(" + data.data.prissued + ")";
+          const prissuedPOST = data.data.PendingWithVendorPOST + data.data.PendingWithEDRCPOST + data.data.Completed + "(" + data.data.poissued + ")"
+
+          document.getElementById('kpi1_data').innerHTML = prissuedpre;
+          document.getElementById('kpi1_sub').innerHTML = prissuedpre;
+
+
+          document.getElementById('kpi2_data').innerHTML = data.data.PendingWithEDRCPRE;
+
+          document.getElementById('kpi3_data').innerHTML = data.data.PendingWithVendorPRE;
+
+          document.getElementById('kpi4_data').innerHTML = data.data.Cleared + "(" + data.data.prcleared + ")";
+
+          document.getElementById('kpi1_data2').innerHTML = prissuedPOST;
+
+          document.getElementById('kpi2_data2').innerHTML = data.data.PendingWithEDRCPOST;
+
+          document.getElementById('kpi3_data2').innerHTML = data.data.PendingWithVendorPOST;
+
+          document.getElementById('kpi4_data2').innerHTML = data.data.Completed + "(" + data.data.ClearedPO + ")";
+
+          document.getElementById('pr_floated').innerHTML = data.data.floated + ' d'
+          document.getElementById('pre_o').innerHTML = data.data.pre_o + ' d'
+          document.getElementById('post_o').innerHTML = data.data.post_o + ' d'
+
+        })
+        .catch(error => {
+          console.error('Error fetching KPI data:', error);
+        });
+    }
+    fetchKPIData();
+
+
+    nested = [
+      [{ label: 'BASIC DETAILS', colspan: 6 }, { label: 'PRE ORDER STAGE', colspan: 21 }, { label: 'POST ORDER STAGE', colspan: 11 }],
+      [{ label: 'PROJECT', colspan: 1 }, { label: 'DISCIPLINE', colspan: 1 }, { label: 'EQUIPMENT', colspan: 1 }, { label: 'PR CODE', colspan: 1 }, { label: 'PR VENDOR<br>CODE', colspan: 1 }, { label: 'VENDOR<br>NAME', colspan: 1 }, { label: 'STATUS', colspan: 1 },
+      { label: 'DAYS ELAPSED', colspan: 1 }, { label: 'REMARKS', colspan: 1 }, { label: 'VENDOR CONTACT', colspan: 1 }, { label: 'VENDOR EMAIL', colspan: 1 }, { label: 'PR ISSUED DATE<br>(PRELIMINARY BOQ)', colspan: 1 }, { label: 'ENQUIRY SENT<br>DATE', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-A', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-A', colspan: 1 },
+      { label: 'OFFER<br>RECEIVED DATE<br>REV-B', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-B', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-C', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-C', colspan: 1 },
+      { label: 'OFFER<br>RECEIVED DATE<br>REV-D', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-D', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-E', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-E', colspan: 1 },
+      { label: 'FINAL TECHNICAL<br>CLEARANCE MEETING<br>WITH VENDOR', colspan: 1 }, { label: 'FINAL DOCUMENT<br>RECEIVED FROM<br>VENDOR', colspan: 1 }, { label: 'SENT TO BU<br>OPERATIONS', colspan: 1 }, { label: 'PRIORITY<br>(T1/T2/T3)', colspan: 1 },
+      { label: 'PO ISSUED<br>DATE', colspan: 1 }, { label: 'FINALIZED VENDOR', colspan: 1 }, { label: 'POST ORDER<br>DOC/DRG<br>RECEIVED DATE', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE', colspan: 1 },
+      { label: 'FINAL TECHNICAL<br>CLEARANCE MEETING<br>WITH VENDOR', colspan: 1 }, { label: 'FINAL DOCUMENT<br>RECEIVED FROM<br>VENDOR', colspan: 1 }, { label: 'CLIENT APPROVAL<br>DATE', colspan: 1 }, { label: 'PLANNED<br>PRE-ORDER<br>COMPLETION DATE', colspan: 1 },{ label: 'PLANNED<br>PURCHASE-ORDER<br> DATE', colspan: 1 },{ label: 'PLANNED<br>POST-ORDER<br>COMPLETION DATE', colspan: 1 }, { label: 'LAST<br>MODIFIED BY', colspan: 1 },],
+    ];
+
+
+    fetch('/lnt/api/getprStatus')
+      .then(response => response.json())
+      .then(data => {
+        var time = data.days
+        const filteredData = data.data.filter(row => row['item_vendor_code'] !== '');
+        console.log(filteredData)
+        const hot = new Handsontable(document.getElementById('status'), {
+          width: "auto",
+          height: 500,
+          data: filteredData,
+          filters: true,
+          rowHeaders: true,
+          readOnly: true,
+          contextMenu: ['hidden_columns_show', 'hidden_columns_hide'],
+          hiddenColumns: {
+            columns: [11],
+            indicators: true,
+          },
+          renderer: function (instance, td, row, col, prop, value, cellProperties) {
+            Handsontable.renderers.TextRenderer.apply(this, arguments);
+            td.style.color = 'black';
+            td.style.background = '#ffffff';
+          },
+          dropdownMenu: ['filter_by_condition', 'filter_by_value', 'filter_action_bar',],
+          nestedHeaders: nested,
+          colHeaders: true,
+          manualColumnResize: true,
+          manualRowResize: true,
+
+          colWidths: [110, 130, 150, 110, 150, 130, 220, 130, 200, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 200, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170,170,170, 300],
+          className: "custom-table",
+          copyPaste: true,
+          licenseKey: 'non-commercial-and-evaluation',
+          columns: data.columns.map((column) => {
+            return { data: column };
+
+          }),
+          multiColumnSorting: {
+            initialConfig: [
+              {
+                column: 0,
+                sortOrder: 'asc',
+              },
+              {
+                column: 1,
+                sortOrder: 'desc',
+              },
+              {
+                column: 4,
+                sortOrder: 'asc',
+              },
+            ],
+          },
+        });
+
+        
+
+        Handsontable.hooks.add('modifyColWidth', function (width) {
+          if (this === hot.getPlugin('dropdownMenu').menu.hotMenu) {
+            return 330;
+          }
+
+          return width;
+        })
+        $(document).ready(function () {
+
+          $('#dropdownMenuButton4,#dropdownMenuButton5').select2({
+            width: '200px',
+            height: 'auto',
+
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: 5,
+
+          });
+          
+          $('#dropdownMenuButton1, #dropdownMenuButton2, #dropdownMenuButton3').select2({
+            width: '100px',
+
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: 5,
+          });
+          $('#dropdownMenuButton1, #dropdownMenuButton2, #dropdownMenuButton3, #dropdownMenuButton4, #dropdownMenuButton5').next('.select2-container').css('margin-right', '30px');
+        });
+
+
+        function showLoadingScreen() {
+          // Show loading screen
+          $('#loading-screen').show();
+        }
+
+        function hideLoadingScreen() {
+          // Hide loading screen
+          $('#loading-screen').hide();
+        }
+
+        function getHandsontableData() {
+          return hot.getData();
+        }
+
+        function sendDataToServer() {
+          var handsontableData = getHandsontableData();
+          console.log(handsontableData);
+          showLoadingScreen();
+
+          // Get current date and time
+          var currentDate = new Date();
+          var formattedDate = currentDate.toISOString().slice(0, 19).replace(/[-T]/g, '_').replace(/:/g, '-');
+
+          fetch('/lnt/exportxl', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8',
+            },
+            body: JSON.stringify(handsontableData),
+          })
+            .then(response => response.blob())
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              // Append current date and time to filename
+              a.download = 'Detailed_PR_Status_' + formattedDate + '.xlsx';
+              a.href = url;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(url);
+              hideLoadingScreen();
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              hideLoadingScreen();
+            });
+        }
+
+
+        $('#exportButton').on('click', function () {
+          sendDataToServer();
+        });
+
+
+
+
+      //   function sendTopSheetServer() {
+      //     showLoadingScreen();
+
+      //     // Get current date and time
+      //     var currentDate = new Date();
+      //     var formattedDate = currentDate.toISOString().slice(0, 19).replace(/[-T]/g, '_').replace(/:/g, '-');
+
+      //     fetch('/lnt/top_sheet', {
+      //       method: 'POST',
+      //       headers: {
+      //         'Content-Type': 'application/json;charset=UTF-8',
+      //       },
+      //       body: JSON.stringify(handsontableData),
+      //     })
+      //       .then(response => response.blob())
+      //       .then(blob => {
+      //         const url = window.URL.createObjectURL(blob);
+      //         const a = document.createElement('a');
+      //         // Append current date and time to filename
+      //         a.download = 'Detailed_PR_Status_' + formattedDate + '.xlsx';
+      //         a.href = url;
+      //         document.body.appendChild(a);
+      //         a.click();
+      //         document.body.removeChild(a);
+      //         window.URL.revokeObjectURL(url);
+      //         hideLoadingScreen();
+      //       })
+      //       .catch(error => {
+      //         console.error('Error:', error);
+      //         hideLoadingScreen();
+      //       });
+      //   }
+
+
+      //   $('#topButton').on('click', function () {
+      //     sendTopSheetServer();
+      //   });
+      });
+
+  </script>
+
+
+
+</body>
+
+{% endblock %}
+
+</html>

@@ -1,0 +1,502 @@
+{% extends "homepage.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" http-equiv="refresh" content="36000" content="width=device-width, initial-scale=1.0">
+    <title>Fill PR Data</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@13.1/dist/handsontable.full.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@13.1/dist/handsontable.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source Sans 3&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@500&display=swap');
+
+
+        body {
+            font-family: "Source Sans 3";
+            background-color: #f8f9fa;
+        }
+
+        .red-star {
+            color: red;
+        }
+
+        .container {
+            display: block;
+            margin: 50px auto;
+            max-width: 95%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        #disciplineDropdownContainer {
+            display: none;
+        }
+
+        form {
+            margin-bottom: 20px;
+            position: relative;
+
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        #suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-top: none;
+            display: none;
+            z-index: 2;
+        }
+
+        #suggestions a {
+            display: block;
+            padding: 10px;
+            color: #000;
+            text-decoration: none;
+        }
+
+        #suggestions a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .mb-3 {
+
+            display: block;
+            justify-content: center;
+
+        }
+
+        button {
+            float: right;
+            margin-right: 10px;
+        }
+
+        .custom-table thead th {
+            padding: 0px 10px;
+            font-size: 14px;
+            font-family: "Source Sans 3";
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .custom-table {
+
+            font-family: "Source Sans 3";
+
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+            border-radius: 5px;
+        }
+
+        .popup-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 900px;
+            border-radius: 7px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .show {
+            display: block;
+        }
+
+        /* CSS for the round button */
+        .rule-button {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            background-color: #e0e0e0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            right: 50px;
+            /* Adjust position as needed */
+            top: 10px;
+            /* Adjust position as needed */
+        }
+
+        .rules {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+
+</head>
+
+<body ng-app="Vendoreng">
+    <div class="container">
+        <a href="/lnt/prstatus" style="color: #0b7738; font-weight: bold; text-decoration: none;"> <img
+                src="{{ url_for('static',filename='back.png') }}" alt="back" style="width: 30px;">Go Back</a>
+        <h2 style="font-weight: bold;">New PR Status Data</h2>
+
+        <form>
+            <div class="mb-3">
+                <label for="searchBar" class="form-label">Search for Projects:</label>
+                <input type="text" class="form-control" name="searchBar" id="searchBar"
+                    placeholder="Type Job Code or Project Name" style="width: 20%; border-radius: 20px;">
+                <div id="suggestions" style="width: 20%;border-radius: 20px;margin-top: 5px;"></div>
+
+
+            </div>
+            <button type="button" class=" rule-button" id="rule-button" data-bs-toggle="modal" data-bs-target="#myModal"
+                style="justify-content: center;align-items: center;"> <img
+                    src="{{ url_for('static',filename='guidebook.png')}}" alt="back" style="width: 30px;"></button>
+        </form>
+
+
+        <div id="hot" style="margin: 30px 0; width: 100%; z-index: 1;"></div>
+        <h6 id="star" style="color: #0c5091; font-weight: bold;">Note: "<span class="red-star"
+                style="font-weight: bolder; font-size: larger;">*</span>" marked fields are mandatory</h6>
+        <button id="updateButton" class="btn btn-primary"
+            style="margin-top: 20px;  background-color:#0b7738; border: none;">Add
+            Data</button>
+
+
+
+    </div>
+
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content" style="height: 400px;">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"> <img src="{{ url_for('static',filename='information.png') }}" alt="back"
+                            style="width: 30px; margin-right: 5px;">Instructions for updating Data:</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <h5>Rules:</h5>
+                    <p class="rules">1. Mandatory fields marked with <span class="red-star"
+                            style="font-weight: bolder; font-size: larger;"> * </span> should be filled for every row.
+                    </p>
+                    <p class="rules">2. Vendor Name and finalized vendor name should be same. </p>
+                    <p class="rules">3. If the status is within 2 to 13, Vendor Name & PR Issued date columns should be
+                        filled.
+                    </p>
+                    <p class="rules">4. If the status is within 3 to 6 or 8 to 13, Comments Sent from EDRC column should
+                        be
+                        filled.</p>
+                    <p class="rules">5. If the status is within 8 to 13, or 5 Final technical clearance with Vendor &
+                        final
+                        document received column should be filled.</p>
+                    <p class="rules">6. If the status is within 8 to 13, Sent to BU Operations & Priority column should be filled.
+                    </p>
+                    <p class="rules">7. If the status is within 9 to 13, Finalized Vendor & PO Issued date column should
+                        be
+                        filled.</p>
+                    <p class="rules">8. If the status is within 10 to 13, Post order document received date column
+                        should be
+                        filled.</p>
+                    <p class="rules">9. If the status is within 11 to 13, Comments sent from EDRC date column should be
+                        filled.
+                    </p>
+                    <p class="rules">9. If the status is within 12 to 13, Final technical clearance with Vendor & final
+                        document
+                        received column should be filled.</p>
+                    <p class="rules">10. If the status is 13, MFC Issued date column should be filled.</p>
+                    <hr class="rounded">
+                    <h5>Standard Statuses:</h5>
+                    <p class="rules">1. Enquiry yet to float</p>
+                    <p class="rules">2. Awaiting pre-offer from vendor</p>
+                    <p class="rules">3. Pre-order pending with EDRC</p>
+                    <p class="rules">4. Pre-order comments issued</p>
+                    <p class="rules">5. Pre-order technically cleared</p>
+                    <p class="rules">6. Pre-order technically rejected</p>
+                    <p class="rules">7. Regret offer</p>
+                    <p class="rules">8. Sent to BU Operations</p>
+                    <p class="rules">9. Awaiting post-offer from vendor</p>
+                    <p class="rules">10. Post-order pending with EDRC</p>
+                    <p class="rules">11. Post-order comments issued</p>
+                    <p class="rules">12. Post-order technically cleared</p>
+                    <p class="rules">13. Approved by Client</p>
+
+
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">I understood!</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePopup() {
+            var popup = document.getElementById("instructionPopup");
+            popup.classList.toggle("show");
+        }
+
+        $('#updateButton').hide();
+        $('#star').hide();
+
+
+
+        $('#searchBar').on('input', function () {
+            var searchQuery = $(this).val();
+            var suggestionsContainer = $('#suggestions');
+
+            if (searchQuery.length >= 2) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/lnt/suggest',
+                    data: { 'search_query': searchQuery },
+                    success: function (data) {
+                        suggestionsContainer.empty();
+
+                        for (var i = 0; i < data.length; i++) {
+                            suggestionsContainer.append('<a href="#">' + data[i] + '</a>');
+                        }
+
+                        suggestionsContainer.show();
+                    }
+                });
+            } else {
+                suggestionsContainer.hide();
+            }
+
+        });
+
+
+        $('#suggestions').on('click', 'a', function () {
+            var selectedJobCode = $(this).text();
+            $('#suggestions').hide();
+            $('#updateButton').show();
+            $('#star').show();
+
+
+
+            // Fill search bar with the clicked job code
+            $('#searchBar').val(selectedJobCode);
+            fetchDetails(selectedJobCode);
+        });
+
+        function fetchDetails(jobCode) {
+            $.ajax({
+                type: 'POST',
+                url: '/lnt/api/getPrdata',
+                data: { 'selected_job_code': jobCode },
+                success: function (data) {
+                    
+                    initializeHandsontable(data);
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 403) {
+                        // Handle 403 Forbidden (Permission Denied) status
+                        alert('Permission Denied. You do not have necessary permissions to perform this operation.');
+                    } else {
+                        // Handle other errors if needed
+                        console.error('Error:', status, error);
+                    }
+                }
+            });
+        }
+
+        nested = [
+            [{ label: 'BASIC DETAILS', colspan: 6 }, { label: 'PRE ORDER STAGE', colspan: 21 }, { label: 'POST ORDER STAGE', colspan: 7 },{ label: '', colspan: 4 }],
+            [{ label: 'PROJECT<span class="red-star" style="margin-left:2px">*</span>', colspan: 1 }, { label: 'DISCIPLINE<span class="red-star" style="margin-left:2px">*</span>', colspan: 1 }, { label: 'EQUIPMENT<span class="red-star" style="margin-left:2px">*</span>', colspan: 1 }, { label: 'PR CODE<span class="red-star" style="margin-left:2px">*</span>', colspan: 1 }, { label: 'PR VENDOR<br>CODE<span class="red-star" style="margin-left:2px">*</span>', colspan: 1 }, { label: 'VENDOR', colspan: 1 },
+            { label: 'STATUS', colspan: 1 },
+            { label: 'DAYS ELAPSED', colspan: 1 }, { label: 'REMARKS', colspan: 1 }, { label: 'VENDOR CONTACT', colspan: 1 }, { label: 'VENDOR EMAIL', colspan: 1 }, { label: 'PR ISSUED DATE<br>(PRELIMINARY BOQ)', colspan: 1 }, { label: 'ENQUIRY SENT<br>DATE', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-A', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-A', colspan: 1 },
+            { label: 'OFFER<br>RECEIVED DATE<br>REV-B', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-B', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-C', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-C', colspan: 1 },
+            { label: 'OFFER<br>RECEIVED DATE<br>REV-D', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-D', colspan: 1 }, { label: 'OFFER<br>RECEIVED DATE<br>REV-E', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE<br>REV-E', colspan: 1 },
+            { label: 'FINAL TECHNICAL<br>CLEARANCE MEETING<br>WITH VENDOR', colspan: 1 }, { label: 'FINAL DOCUMENT<br>RECEIVED FROM<br>VENDOR', colspan: 1 }, { label: 'SENT TO BU<br>OPERATIONS', colspan: 1 }, { label: 'PRIORITY<br>(T1/T2/T3)', colspan: 1 },
+            { label: 'PO ISSUED<br>DATE', colspan: 1 }, { label: 'FINALIZED VENDOR', colspan: 1 }, { label: 'POST ORDER<br>DOC/DRG<br>RECEIVED DATE', colspan: 1 }, { label: 'COMMENTS SENT<br>FROM EDRC DATE', colspan: 1 },
+            { label: 'FINAL TECHNICAL<br>CLEARANCE MEETING<br>WITH VENDOR', colspan: 1 }, { label: 'FINAL DOCUMENT<br>RECEIVED FROM<br>VENDOR', colspan: 1 }, { label: 'CLIENT APPROVAL<br>DATE', colspan: 1 },{ label: 'PLANNED<br>PRE-ORDER<br>COMPLETION DATE', colspan: 1 },{ label: 'PLANNED<br>PURCHASE ORDER DATE', colspan: 1 },{ label: 'PLANNED<br>POST-ORDER<br>COMPLETION DATE', colspan: 1 },  { label: 'LAST<br>MODIFIED BY', colspan: 1 },],
+        ];
+
+    function initializeHandsontable(data) {
+    const today = moment().format('DD.MM.YY');
+    var flagpo = data.flag_po;
+    
+    const cont = new Handsontable(document.getElementById('hot'), {
+        width: "100%",
+        height: 400,
+        data: [[" "]],
+        filters: true,
+        rowHeaders: true,
+        contextMenu: ['cut', 'copy', "new_row"],
+        dropdownMenu: ['filter_by_value', 'filter_action_bar'],
+        nestedHeaders: nested,
+        manualColumnResize: true,
+        className: "custom-table",
+        contextMenu: true,
+        hiddenColumns: {
+            columns: [11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 37],
+            indicators: false,
+        },
+        licenseKey: 'non-commercial-and-evaluation',
+        columns: data.columns.map(column => {
+            if (flagpo === 1) {
+                return { data: column, readOnly: true, placeholder };
+            } else if ([
+                "pr_issue_date_pre", "pr_issue_date_final", "offer_recv_date", "comments_sent_pre", 'offer_recv_date_2', 'comments_sent_pre_2', 'offer_recv_date_3', 'comments_sent_pre_3',
+                'offer_recv_date_4', 'comments_sent_pre_4', 'offer_recv_date_5', 'comments_sent_pre_5', "tc_meeting_vendor_pre", "final_vendor_doc_pre", "post_doc_rcv_dt", "comments_sent_post",
+                "tc_meeting_vendor_post", "final_vendor_doc_post", "sent_to_scm", "po_issued_date", "mfc_issued_date", "target_completion_date"
+            ].includes(column)) {
+                // Use date editor for date columns
+                return { data: column, type: 'date', dateFormat: 'DD.MM.YY' };
+            } else if (column === "discipline") {
+                return {
+                    data: column, type: 'dropdown',
+                    source: ["Process", "Mechanical", "Electrical", "Instrumentation", "Others"]
+                };
+            } else if (["elapsed_days", "target_completion_date_post", 'target_completion_date_po'].includes(column)) {
+                return { data: column, readOnly: true };
+            } else if (column === "status") {
+                return {
+                    data: column, type: 'dropdown',
+                    source: ["Enquiry yet to float", "Awaiting pre-offer from vendor"]
+                };
+            } else {
+                // For other columns, use default settings
+                return { data: column };
+            }
+        }),
+        afterChange: function (changes, source) {
+            if (source === 'loadData') {
+                return; // Skip this logic if loading initial data
+            }
+            let invalidRow = 1;
+
+            changes.forEach(([row, col, oldValue, newValue]) => {
+                if (col === 'target_completion_date' && newValue) {
+
+                    const enteredDate = moment(newValue, 'DD.MM.YY');
+                    if (enteredDate.isBefore(moment(today, 'DD.MM.YY'))) {
+                        invalidRow = null;
+                    } else {
+                        // Perform other necessary updates
+                        const postOrderColIndex = data.columns.indexOf('target_completion_date_post');
+                        if (postOrderColIndex !== -1) {
+                            const newDate = enteredDate.add(17, 'days').format('DD.MM.YY');
+                            cont.setDataAtCell(row, 35, newDate);
+                            invalidRow=2
+                        }
+                    }
+                }
+
+                if (col=== 'target_completion_date_po' && newValue) {
+                    const newDate = moment(newValue, 'DD.MM.YY').add(60, 'days').format('DD.MM.YY');
+                    const postOrderColIndex = data.columns.indexOf('target_completion_date_post');
+                    if (postOrderColIndex !== -1) {
+                        cont.setDataAtCell(row, 36, newDate);
+                    }
+                }
+
+               
+            });
+            if (invalidRow === null) {
+                alert(`Error: Row  has a target completion date less than today's date.`);
+                document.getElementById('updateButton').disabled = true;
+            } else {
+                document.getElementById('updateButton').disabled = false;
+            }
+         
+        }
+    });
+
+    var updateButton = document.getElementById('updateButton');
+    updateButton.onclick = function () {
+        saveChangesToSQL(cont.getData(), $('#searchBar').val());
+    };
+}
+
+
+
+        function saveChangesToSQL(data, job_Code) {
+            console.log(data)
+            // Send the modified data to the Flask backend for updating SQLite
+            $.ajax({
+                type: 'POST',
+                url: '/lnt/api/updatePrdata',
+                contentType: 'application/json;charset=UTF-8',
+
+                data: JSON.stringify({ 'selected_job_code': job_Code, 'updated_data': data }),
+                success: function (response) {
+                    alert('Data updated successfully!');
+                    window.location.href = '/lnt/newpr';
+                },
+                error: function (error) {
+                    console.error('Error updating data:', error);
+                    var errorMessage = error.responseJSON.error; // Extracting the error message
+                    alert('Error updating data: ' + errorMessage); // Displaying the error message in the alert box
+                }
+            });
+        }
+
+
+
+
+
+
+
+
+
+    </script>
+
+    {% endblock %}
+</body>
+
+</html>
